@@ -7,7 +7,7 @@
     
 ### Especificações
 
-- [ ] Ler o status do servidor do jogo se ele está online ou não.
-- [ ] Reiniciar, iniciar e desligar o servidor do jogo.
+- [X] Ler o status do servidor do jogo se ele está online ou não.
+- [X] Reiniciar, iniciar e desligar o servidor do jogo.
 - [ ] Listar players online.
-- [ ] Enviar status caso um player entre ou saia.
+- [X] Enviar status caso um player entre ou saia.
