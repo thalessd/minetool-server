@@ -20,3 +20,4 @@
 - [X] CRON Job para restartar o servidor todo dia.
 - [X] Restart de servidor apartir do jogo, com permissão de usuários.
 - [ ] Implementar sistema de autenticação no socket.io
+- [ ] Desativar CRON quando o servidor for desligado via Socket

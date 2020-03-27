@@ -113,12 +113,8 @@ export class Controller {
     this.minecraftServer.onMessageWithCode(code, ({ user }) => {
       const userFinded = userWhiteList.find((uwl) => uwl === user);
 
-      console.log(userFinded);
-
       if (userFinded.length) {
-        console.log(" ======== Restart de Servidor =========");
-        this.minecraftServer.restart();
-        return;
+        return this.minecraftServer.restart();
       }
 
       this.minecraftServer.sendSay(
