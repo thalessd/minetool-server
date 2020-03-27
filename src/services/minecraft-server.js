@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import { EventEmitter } from "events";
+import moment from "moment";
 
 export class MinecraftServer {
   server = null;
@@ -19,6 +20,8 @@ export class MinecraftServer {
   logs = false;
 
   isOnline = false;
+
+  listOnlineUser = [];
 
   constructor(minecraftServerPath) {
     this.minecraftServerPath = minecraftServerPath;
@@ -126,12 +129,14 @@ export class MinecraftServer {
           y: Math.round(result[6]),
           z: Math.round(result[7]),
         },
+        date: moment.now(),
       });
 
     result = userLoggedOut(logLine);
     if (result)
       return evt.emit(type.USER_LOGGED_OUT, {
         user: result[1],
+        date: moment.now(),
       });
 
     result = userMessageWithCode(logLine);
@@ -157,8 +162,12 @@ export class MinecraftServer {
 
   // Senders
 
-  sendSay = (message) => {
-    this._sendCommand(`say ${message}`);
+  sendSay = (message, flags = "") => {
+    this._sendCommand(`say ${flags} ${message}`);
+  };
+
+  sendKick = (user, reason = "") => {
+    this._sendCommand(`kick ${user} ${reason}`);
   };
 
   // Listeners
@@ -172,11 +181,20 @@ export class MinecraftServer {
   };
 
   onUserLogged = (run) => {
-    this.event.on(this.EVENT_TYPE.USER_LOGGED, run);
+    this.event.on(this.EVENT_TYPE.USER_LOGGED, (data) => {
+      this.listOnlineUser.push(data);
+      run(data);
+    });
   };
 
   onUserLoggedOut = (run) => {
-    this.event.on(this.EVENT_TYPE.USER_LOGGED_OUT, run);
+    this.event.on(this.EVENT_TYPE.USER_LOGGED_OUT, (data) => {
+      const index = this.listOnlineUser.findIndex(
+        (lou) => lou.user === data.user
+      );
+      this.listOnlineUser.splice(index, 1);
+      run(data);
+    });
   };
 
   onMessageWithCode = (codeStr, run) => {
@@ -195,5 +213,11 @@ export class MinecraftServer {
 
   onServerKill = (run) => {
     this.event.on(this.EVENT_TYPE.KILLED, run);
+  };
+
+  // Getters
+
+  getListOnlineUser = () => {
+    return this.listOnlineUser;
   };
 }

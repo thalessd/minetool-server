@@ -82,6 +82,14 @@ async function app() {
           console.bLog("Enviar Mensagem");
           minecraftServer.sendSay("Teste de Say em jogo");
           return;
+        case "5":
+          console.bLog("Mostrar Lista de Usuários Online");
+          console.log(minecraftServer.getListOnlineUser());
+          return;
+        case "6":
+          console.bLog("Kickar usuário do Server");
+          minecraftServer.sendKick("thalessd", "Usuário Insano");
+          return;
         default:
           return;
       }
