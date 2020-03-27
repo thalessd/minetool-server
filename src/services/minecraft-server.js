@@ -96,15 +96,15 @@ export class MinecraftServer {
 
     const userLogged = (str) =>
       str.match(
-        /^([\w ]+)\[\/([\d.]+):([\d]+)] logged in with entity id ([\d]+) at \(([\d-.]+), ([\d-.]+), ([\d-.]+)\)$/
+        /^([\w_ ]+)\[\/([\d.]+):([\d]+)] logged in with entity id ([\d]+) at \(([\d-.]+), ([\d-.]+), ([\d-.]+)\)$/
       );
 
-    const userLoggedOut = (str) => str.match(/^([\w ]+) left the game$/);
+    const userLoggedOut = (str) => str.match(/^([\w_ ]+) left the game$/);
 
     const userMessageWithCode = (str) =>
-      str.match(/^<([\w]+)>[ ](#[\w]+)[ ](.*)$/);
+      str.match(/^<([\w_ ]+)>[ ](#[\w_]+)[ ]?(.*)$/);
 
-    const userMessage = (str) => str.match(/^<([\w]+)>[ ](.*)$/);
+    const userMessage = (str) => str.match(/^<([\w_ ]+)>[ ](.*)$/);
 
     const evt = this.event;
     const type = this.EVENT_TYPE;

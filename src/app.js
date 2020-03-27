@@ -1,6 +1,7 @@
 import "moment/locale/pt-br";
 import env from "dotenv";
 import socketIO from "socket.io";
+import { CronJob } from "cron";
 import { MinecraftServer } from "./services/minecraft-server";
 import { Constants } from "./constants/constants";
 import { Controller } from "./controllers/controller";
@@ -9,7 +10,9 @@ env.config();
 
 async function app() {
   try {
-    const io = socketIO(80);
+    const serverPort = Constants.SERVER_PORT();
+
+    const io = socketIO(serverPort);
 
     const minecraftServer = new MinecraftServer(
       Constants.MINECRAFT_SERVER_PATH()
@@ -38,6 +41,17 @@ async function app() {
       controller.onSay(socket, "say");
       controller.onKick(socket, "kick");
     });
+
+    // Cron Process
+    controller.cronServerRestart(Constants.CRON_TIME_OF_RESTART(), CronJob);
+
+    // In Game Actions
+    const userWhiteList = Constants.USERS_WITH_PERMISSION();
+
+    controller.inGameRestart("server_restart", userWhiteList);
+
+    //Run
+    console.log(`RUNNING ON PORT ${serverPort}`);
   } catch (e) {
     throw e;
   }

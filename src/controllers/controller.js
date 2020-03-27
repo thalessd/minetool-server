@@ -1,3 +1,5 @@
+import { CronJob } from "cron";
+
 export class Controller {
   constructor(io, minecraftServer) {
     this.io = io;
@@ -90,6 +92,38 @@ export class Controller {
   emitUserMessageWithCode(str, code) {
     this.minecraftServer.onMessageWithCode(code, (data) => {
       this.io.emit(str + code, data);
+    });
+  }
+
+  cronServerRestart(cronTime, CronJob) {
+    const job = new CronJob(
+      cronTime,
+      () => {
+        this.minecraftServer.restart();
+      },
+      null,
+      false,
+      "America/Fortaleza"
+    );
+
+    job.start();
+  }
+
+  inGameRestart(code, userWhiteList) {
+    this.minecraftServer.onMessageWithCode(code, ({ user }) => {
+      const userFinded = userWhiteList.find((uwl) => uwl === user);
+
+      console.log(userFinded);
+
+      if (userFinded.length) {
+        console.log(" ======== Restart de Servidor =========");
+        this.minecraftServer.restart();
+        return;
+      }
+
+      this.minecraftServer.sendSay(
+        "O seu usuário não tem permissão para isso!"
+      );
     });
   }
 }
