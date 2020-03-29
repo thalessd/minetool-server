@@ -20,8 +20,16 @@ export class Controller {
 
   onServerStatus(socket, onStr, emitStr) {
     socket.on(onStr, () => {
+      let serverName = this.minecraftServer.getServerProp("motd");
+      serverName = serverName ? serverName : "";
+
+      let serverDifficulty = this.minecraftServer.getServerProp("difficulty");
+      serverDifficulty = serverDifficulty ? serverDifficulty : "";
+
       const serverStatus = {
-        serverOnline: this.minecraftServer.isOnline,
+        serverStatus: this.minecraftServer.serverStatus,
+        serverName,
+        serverDifficulty,
         playersOnline: this.minecraftServer.getListOnlineUser(),
       };
 

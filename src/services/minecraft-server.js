@@ -2,6 +2,8 @@ import { spawn } from "child_process";
 import path from "path";
 import { EventEmitter } from "events";
 import moment from "moment";
+import fs from "fs";
+import ini from "ini";
 
 export class MinecraftServer {
   server = null;
@@ -19,23 +21,22 @@ export class MinecraftServer {
 
   logs = false;
 
-  isOnline = false;
+  serverStatus = "offline";
 
   listOnlineUser = [];
 
   constructor(minecraftServerPath) {
-    this.minecraftServerPath = minecraftServerPath;
+    this.serverFilePath = path.normalize(minecraftServerPath);
+    this.serverFolderPath = path.dirname(this.serverFilePath);
+
     this.event = new EventEmitter();
   }
 
   run = () => {
-    const serverFilePath = path.normalize(this.minecraftServerPath);
-    const serverFolderPath = path.dirname(serverFilePath);
-
     if (this.server) return;
 
-    this.server = spawn(`java`, ["-jar", serverFilePath, "nogui"], {
-      cwd: serverFolderPath,
+    this.server = spawn(`java`, ["-jar", this.serverFilePath, "nogui"], {
+      cwd: this.serverFolderPath,
     });
 
     this.server.stdout.on("data", this._data);
@@ -43,6 +44,8 @@ export class MinecraftServer {
     this.server.stderr.on("data", this._error);
 
     this.event.emit(this.EVENT_TYPE.STARTED);
+
+    this.serverStatus = "loading";
   };
 
   kill = () => {
@@ -55,7 +58,8 @@ export class MinecraftServer {
 
     this.server = null;
 
-    this.isOnline = false;
+    this.serverStatus = "offline";
+    this.listOnlineUser = [];
   };
 
   restart = () => {
@@ -76,7 +80,7 @@ export class MinecraftServer {
 
     this.event.emit(this.EVENT_TYPE.ERRORED, strData);
 
-    this.isOnline = false;
+    this.serverStatus = "offline";
   };
 
   _data = (data) => {
@@ -113,7 +117,7 @@ export class MinecraftServer {
 
     result = serverIsDone(logLine);
     if (result) {
-      this.isOnline = true;
+      this.serverStatus = "online";
       return evt.emit(type.RUNNING);
     }
 
@@ -158,6 +162,19 @@ export class MinecraftServer {
   _sendCommand = (command) => {
     if (this._processStopped()) return;
     this.server.stdin.write(`${command}\n`);
+  };
+
+  _parseServerProperties = () => {
+    try {
+      const fileData = fs.readFileSync(
+        path.join(this.serverFolderPath, "server.properties"),
+        "utf8"
+      );
+
+      return ini.decode(fileData);
+    } catch (e) {
+      return {};
+    }
   };
 
   // Senders
@@ -219,5 +236,12 @@ export class MinecraftServer {
 
   getListOnlineUser = () => {
     return this.listOnlineUser;
+  };
+
+  getServerProp = (prop) => {
+    const properties = this._parseServerProperties();
+    const value = properties[prop];
+
+    return value ? value : null;
   };
 }
