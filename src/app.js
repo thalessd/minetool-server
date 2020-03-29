@@ -31,6 +31,7 @@ async function app() {
     controller.emitUserLoggedOut("user_logged_out");
     controller.emitUserMessage("user_message");
     // controller.emitUserMessageWithCode("user_message_#", "note");
+    controller.emitServerStats("server_stats");
 
     // IO Listners
     io.on("connection", (socket) => {

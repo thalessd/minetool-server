@@ -4,6 +4,8 @@ import { EventEmitter } from "events";
 import moment from "moment";
 import fs from "fs";
 import ini from "ini";
+import pidusage from "pidusage";
+import os from "os";
 
 export class MinecraftServer {
   server = null;
@@ -17,6 +19,7 @@ export class MinecraftServer {
     USER_LOGGED_OUT: "USER_LOGGED_OUT",
     USER_MESSAGE_WITH_CODE: "USER_MESSAGE_WITH_CODE",
     USER_MESSAGE: "USER_MESSAGE",
+    SERVER_STATS_UPDATE: "SERVER_STATS_UPDATE",
   };
 
   logs = false;
@@ -24,6 +27,8 @@ export class MinecraftServer {
   serverStatus = "offline";
 
   listOnlineUser = [];
+
+  processInterval = null;
 
   constructor(minecraftServerPath) {
     this.serverFilePath = path.normalize(minecraftServerPath);
@@ -46,6 +51,21 @@ export class MinecraftServer {
     this.event.emit(this.EVENT_TYPE.STARTED);
 
     this.serverStatus = "loading";
+
+    this.processInterval = setInterval(async () => {
+      try {
+        const stats = await pidusage(this.server.pid);
+        const cpuCount = os.cpus().length;
+
+        if (stats.cpu > 0) {
+          stats.cpu = stats.cpu / cpuCount;
+        }
+
+        this.event.emit(this.EVENT_TYPE.SERVER_STATS_UPDATE, stats);
+      } catch (e) {
+        clearInterval(this.processInterval);
+      }
+    }, 2000);
   };
 
   kill = () => {
@@ -60,6 +80,10 @@ export class MinecraftServer {
 
     this.serverStatus = "offline";
     this.listOnlineUser = [];
+
+    if (this.processInterval) {
+      clearInterval(this.processInterval);
+    }
   };
 
   restart = () => {
@@ -230,6 +254,10 @@ export class MinecraftServer {
 
   onServerKill = (run) => {
     this.event.on(this.EVENT_TYPE.KILLED, run);
+  };
+
+  onServerStats = (run) => {
+    this.event.on(this.EVENT_TYPE.SERVER_STATS_UPDATE, run);
   };
 
   // Getters

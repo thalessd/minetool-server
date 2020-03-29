@@ -1,4 +1,4 @@
-import { CronJob } from "cron";
+import filesize from "filesize";
 
 export class Controller {
   constructor(io, minecraftServer) {
@@ -100,6 +100,20 @@ export class Controller {
   emitUserMessageWithCode(str, code) {
     this.minecraftServer.onMessageWithCode(code, (data) => {
       this.io.emit(str + code, data);
+    });
+  }
+
+  emitServerStats(str) {
+    this.minecraftServer.onServerStats((data) => {
+      const { cpu, memory } = data;
+
+      const memoryStr = filesize(memory, { round: 0 }); // "259 KB";
+      const cpuStr = `${Math.round(cpu)}%`;
+
+      this.io.emit(str, {
+        memory: memoryStr,
+        cpu: cpuStr,
+      });
     });
   }
 
