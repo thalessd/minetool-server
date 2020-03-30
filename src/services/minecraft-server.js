@@ -20,6 +20,7 @@ export class MinecraftServer {
     USER_MESSAGE_WITH_CODE: "USER_MESSAGE_WITH_CODE",
     USER_MESSAGE: "USER_MESSAGE",
     SERVER_STATS_UPDATE: "SERVER_STATS_UPDATE",
+    SERVER_DATA: "SERVER_DATA",
   };
 
   logs = false;
@@ -137,6 +138,8 @@ export class MinecraftServer {
     const evt = this.event;
     const type = this.EVENT_TYPE;
 
+    evt.emit(type.SERVER_DATA, logLine);
+
     let result;
 
     result = serverIsDone(logLine);
@@ -211,6 +214,14 @@ export class MinecraftServer {
     this._sendCommand(`kick ${user} ${reason}`);
   };
 
+  sendTp = (user, to) => {
+    this._sendCommand(`tp ${user} ${to}`);
+  };
+
+  sendCommand = (command) => {
+    this._sendCommand(command);
+  };
+
   // Listeners
 
   onServerStart = (run) => {
@@ -258,6 +269,10 @@ export class MinecraftServer {
 
   onServerStats = (run) => {
     this.event.on(this.EVENT_TYPE.SERVER_STATS_UPDATE, run);
+  };
+
+  onServerData = (run) => {
+    this.event.on(this.EVENT_TYPE.SERVER_DATA, run);
   };
 
   // Getters

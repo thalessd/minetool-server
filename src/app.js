@@ -32,6 +32,7 @@ async function app() {
     controller.emitUserMessage("user_message");
     // controller.emitUserMessageWithCode("user_message_#", "note");
     controller.emitServerStats("server_stats");
+    controller.emitServerData("server_data");
 
     // IO Listners
     io.on("connection", (socket) => {
@@ -41,6 +42,8 @@ async function app() {
       controller.onServerRestart(socket, "server_restart");
       controller.onSay(socket, "say");
       controller.onKick(socket, "kick");
+      controller.onTp(socket, "tp");
+      controller.onCommand(socket, "command");
     });
 
     // Cron Process
@@ -49,7 +52,7 @@ async function app() {
     // In Game Actions
     const userWhiteList = Constants.USERS_WITH_PERMISSION();
 
-    controller.inGameRestart("server_restart", userWhiteList);
+    controller.inGameRestart("restart_server", userWhiteList);
 
     //Run
     console.log(`RUNNING ON PORT ${serverPort}`);

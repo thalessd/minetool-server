@@ -1,6 +1,8 @@
 import filesize from "filesize";
 
 export class Controller {
+  isStoppedManually = true;
+
   constructor(io, minecraftServer) {
     this.io = io;
     this.minecraftServer = minecraftServer;
@@ -15,6 +17,18 @@ export class Controller {
   onKick(socket, str) {
     socket.on(str, (message, reason = "") => {
       this.minecraftServer.sendKick(message, reason);
+    });
+  }
+
+  onTp(socket, str) {
+    socket.on(str, (user, to) => {
+      this.minecraftServer.sendTp(user, to);
+    });
+  }
+
+  onCommand(socket, str) {
+    socket.on(str, (command) => {
+      this.minecraftServer.sendCommand(command);
     });
   }
 
@@ -39,18 +53,21 @@ export class Controller {
 
   onServerRun(socket, str) {
     socket.on(str, () => {
+      this.isStoppedManually = false;
       this.minecraftServer.run();
     });
   }
 
   onServerStop(socket, str) {
     socket.on(str, () => {
+      this.isStoppedManually = true;
       this.minecraftServer.kill();
     });
   }
 
   onServerRestart(socket, str) {
     socket.on(str, () => {
+      this.isStoppedManually = false;
       this.minecraftServer.restart();
     });
   }
@@ -117,11 +134,19 @@ export class Controller {
     });
   }
 
+  emitServerData(str) {
+    this.minecraftServer.onServerData((data) => {
+      this.io.emit(str, data);
+    });
+  }
+
   cronServerRestart(cronTime, CronJob) {
     const job = new CronJob(
       cronTime,
       () => {
-        this.minecraftServer.restart();
+        if (!this.isStoppedManually) {
+          this.minecraftServer.restart();
+        }
       },
       null,
       false,
@@ -135,7 +160,7 @@ export class Controller {
     this.minecraftServer.onMessageWithCode(code, ({ user }) => {
       const userFinded = userWhiteList.find((uwl) => uwl === user);
 
-      if (userFinded.length) {
+      if (userFinded) {
         return this.minecraftServer.restart();
       }
 
