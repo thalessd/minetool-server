@@ -207,15 +207,15 @@ export class MinecraftServer {
   // Senders
 
   sendSay = (message, flags = "") => {
-    this._sendCommand(`say ${flags} ${message}`);
+    this._sendCommand(`/say ${flags} ${message}`);
   };
 
   sendKick = (user, reason = "") => {
-    this._sendCommand(`kick ${user} ${reason}`);
+    this._sendCommand(`/kick ${user} ${reason}`);
   };
 
   sendTp = (user, to) => {
-    this._sendCommand(`tp ${user} ${to}`);
+    this._sendCommand(`/tp ${user} ${to}`);
   };
 
   sendCommand = (command) => {
