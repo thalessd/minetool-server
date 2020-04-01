@@ -105,7 +105,7 @@ export class MinecraftServer {
 
     this.event.emit(this.EVENT_TYPE.ERRORED, strData);
 
-    this.serverStatus = "offline";
+    this.kill();
   };
 
   _data = (data) => {
@@ -206,8 +206,12 @@ export class MinecraftServer {
 
   // Senders
 
-  sendSay = (message, flags = "") => {
-    this._sendCommand(`/say ${flags} ${message}`);
+  sendSay = (message) => {
+    this._sendCommand(`/say ${message}`);
+  };
+
+  sendMsg = (message, flags = "") => {
+    this._sendCommand(`/msg ${flags} ${message}`);
   };
 
   sendKick = (user, reason = "") => {

@@ -9,8 +9,14 @@ export class Controller {
   }
 
   onSay(socket, str) {
-    socket.on(str, (message, flags = "") => {
-      this.minecraftServer.sendSay(message, flags);
+    socket.on(str, (message) => {
+      this.minecraftServer.sendSay(message);
+    });
+  }
+
+  onMsg(socket, str) {
+    socket.on(str, (message, toUser) => {
+      this.minecraftServer.sendMsg(message, toUser);
     });
   }
 

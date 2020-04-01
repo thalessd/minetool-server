@@ -41,6 +41,7 @@ async function app() {
       controller.onServerStatus(socket, "server_status", "server_status_data");
       controller.onServerRestart(socket, "server_restart");
       controller.onSay(socket, "say");
+      controller.onMsg(socket, "msg");
       controller.onKick(socket, "kick");
       controller.onTp(socket, "tp");
       controller.onCommand(socket, "command");
